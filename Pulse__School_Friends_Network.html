@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pulse: School Friends Network</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans for clean, modern school social feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            },
+            campus: {
+              teal: '#0d9488',
+              amber: '#d97706',
+              rose: '#e11d48',
+              purple: '#9333ea',
+              emerald: '#059669',
+              sky: '#0284c7'
+            }
+          },
+          boxShadow: {
+            'glow': '0 0 20px -3px rgba(99, 102, 241, 0.35)',
+            'phone': '0 25px 60px -15px rgba(0, 0, 0, 0.45), 0 0 0 12px #0f172a, 0 0 0 14px #334155',
+            'phone-dark': '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 12px #020617, 0 0 0 14px #1e293b',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom Scrollbar for Phone Frame */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.6);
+    }
+
+    /* Heart like animation */
+    @keyframes heartPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+    .animate-heart-pop {
+      animation: heartPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Voice recording wave animation */
+    @keyframes soundWave {
+      0%, 100% { height: 6px; }
+      50% { height: 24px; }
+    }
+    .wave-bar {
+      animation: soundWave 1.2s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(6) { animation-delay: 0.35s; }
+
+    /* Phone viewport layout rules */
+    .phone-container {
+      width: 100%;
+      max-width: 420px;
+      height: 860px;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border-radius: 44px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @media (max-width: 640px) {
+      .phone-container {
+        max-width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      #device-view-controls {
+        display: none !important;
+      }
+    }
+
+    .fullscreen-mode {
+      max-width: 720px !important;
+      height: 92vh !important;
+      border-radius: 28px !important;
+    }
+  </style>
+</head>
+
+<body class="h-full bg-slate-900 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col items-center justify-center sm:p-4 select-none">
+
+  <div id="device-view-controls" class="hidden sm:flex items-center justify-between w-full max-w-[420px] mb-2 px-2 text-xs text-slate-300 font-medium">
+    <div class="flex items-center gap-1.5">
+      <i data-lucide="smartphone" class="w-4 h-4 text-brand-400"></i>
+      <span id="view-mode-label" class="font-bold text-slate-200">Phone Preview (390 × 844)</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="togglePhoneMode()" id="view-mode-toggle-btn" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-bold transition-all shadow-sm">
+        Expand View
+      </button>
+    </div>
+  </div>
+
+  <div id="phone-frame" class="phone-container bg-slate-50 dark:bg-slate-950 shadow-phone dark:shadow-phone-dark border-4 border-slate-800">
+
+    <!-- Phone Status Bar -->
+    <div id="phone-status-bar" class="flex items-center justify-between px-6 pt-3 pb-1.5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-40 text-slate-800 dark:text-slate-200 border-b border-slate-200/50 dark:border-slate-800/50">
+      <span id="status-bar-clock" class="text-xs font-mono font-bold tracking-tight">09:41</span>
+      
+      <!-- Interactive Dynamic Island -->
+      <div id="dynamic-island" class="w-24 h-4 bg-slate-950 rounded-full flex items-center justify-center gap-2 px-2.5 shadow-inner">
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span>
+        <span id="island-activity-dot" class="hidden w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      </div>
+
+      <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+        <i data-lucide="signal" class="w-3.5 h-3.5"></i>
+        <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+        <i data-lucide="battery" class="w-4 h-4"></i>
+      </div>
+    </div>
+
+    <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-3.5 py-2.5 flex items-center justify-between gap-2">
+      <!-- App Brand Logo -->
+      <div class="flex items-center gap-2">
+        <button onclick="setActiveNav('feed')" class="flex items-center gap-1.5 group">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-campus-teal flex items-center justify-center text-white shadow-glow group-hover:scale-105 transition-transform">
+            <i data-lucide="zap" class="w-4 h-4 fill-white"></i>
+          </div>
+          <div>
+            <h1 class="text-base font-extrabold tracking-tight bg-gradient-to-r from-brand-600 via-indigo-500 to-campus-teal bg-clip-text text-transparent leading-none">Pulse</h1>
+            <span class="text-[9px] font-bold text-slate-400 tracking-wider uppercase">Campus</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Quick Search Bar -->
+      <div class="flex-1 max-w-[150px] relative">
+        <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+        <input 
+          id="global-search-input" 
+          type="text" 
+          oninput="handleSearch(this.value)" 
+          placeholder="Search campus..." 
+          class="w-full pl-8 pr-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs outline-none focus:ring-1 focus:ring-brand-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+        >
+      </div>
+
+      <!-- Header Action Buttons -->
+      <div class="flex items-center gap-1.5">
+        <!-- Theme Toggle -->
+        <button onclick="toggleDarkMode()" class="p-1.5 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Dark/Light">
+          <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Notifications Drawer Trigger -->
+        <button onclick="toggleNotificationsDrawer()" class="relative p-1.5 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Campus alerts">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span id="notif-badge" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-campus-rose ring-2 ring-white dark:ring-slate-900"></span>
+        </button>
+
+        <!-- Current User Profile Avatar / Sign In Trigger -->
+        <button onclick="handleHeaderAvatarClick()" id="header-avatar-btn" class="p-0.5 rounded-xl ring-2 ring-brand-500/50 hover:ring-brand-500 transition-all">
+          <img id="header-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=student" alt="Profile" class="w-6 h-6 rounded-lg object-cover">
+        </button>
+      </div>
+    </header>
+
+    <main id="main-scroll-area" class="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-3.5 pb-24">
+
+      <!-- Stories Carousel Section -->
+      <section id="stories-section" class="bg-white dark:bg-slate-900 p-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-500"></i>
+            <span>Campus Moments</span>
+          </div>
+          <span class="text-[10px] text-slate-400">Tap to view</span>
+        </div>
+
+        <div id="stories-carousel" class="flex items-center gap-3 overflow-x-auto pb-1 pt-0.5">
+          <!-- Add Story Button (Uses Device Storage Picker) -->
+          <div class="flex flex-col items-center flex-shrink-0">
+            <label for="device-story-input" class="w-14 h-14 rounded-2xl border-2 border-dashed border-brand-400 bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-300 flex items-center justify-center cursor-pointer hover:bg-brand-100 transition-colors relative shadow-sm">
+              <i data-lucide="plus" class="w-5 h-5"></i>
+              <input type="file" id="device-story-input" accept="image/*,video/*" class="hidden" onchange="handleDeviceStoryPicked(event)">
+            </label>
+            <span class="text-[10px] font-semibold mt-1 text-slate-600 dark:text-slate-300">Add Story</span>
+          </div>
+
+          <!-- Dynamic Stories Track -->
+          <div id="stories-track" class="flex items-center gap-3"></div>
+        </div>
+      </section>
+
+      <section id="composer-card" class="bg-white dark:bg-slate-900 p-3.5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all space-y-3">
+        
+        <div class="flex items-start gap-2.5">
+          <img id="composer-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=student" class="w-9 h-9 rounded-2xl object-cover ring-2 ring-brand-500/40 flex-shrink-0">
+          
+          <div class="flex-1 min-w-0">
+            <textarea 
+              id="composer-text" 
+              rows="2" 
+              placeholder="What's happening at school? Ask homework, share notes..." 
+              class="w-full bg-transparent text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none resize-none leading-relaxed"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Attachment Preview Area (Image, Video, Audio, File) -->
+        <div id="composer-attachment-preview" class="hidden relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2">
+          <button onclick="clearComposerAttachment()" class="absolute top-2 right-2 z-10 p-1 rounded-full bg-black/60 text-white hover:bg-black transition-colors">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+          
+          <img id="preview-image" src="" class="hidden w-full max-h-48 object-cover rounded-xl">
+          
+          <video id="preview-video" controls class="hidden w-full max-h-48 rounded-xl bg-black"></video>
+          
+          <div id="preview-audio" class="hidden p-3 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center">
+              <i data-lucide="music" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 truncate">
+              <p id="preview-audio-name" class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">Audio track</p>
+              <audio id="preview-audio-player" controls class="w-full mt-1 h-8"></audio>
+            </div>
+          </div>
+
+          <div id="preview-doc" class="hidden p-3 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-campus-emerald text-white flex items-center justify-center">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 truncate">
+              <p id="preview-doc-name" class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">Document.pdf</p>
+              <span id="preview-doc-size" class="text-[10px] text-slate-400">Ready to upload</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Voice Note Recording Bar in Composer -->
+        <div id="composer-voice-bar" class="hidden bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl p-2.5 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1 h-5 px-1">
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+            </div>
+            <span id="composer-voice-timer" class="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">00:00</span>
+            <span class="text-[10px] text-rose-500 font-semibold">Recording voice note...</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="cancelComposerVoiceNote()" class="p-1 text-slate-500 hover:text-rose-600 text-xs font-bold">
+              Cancel
+            </button>
+            <button onclick="saveComposerVoiceNote()" class="px-2.5 py-1 bg-rose-600 text-white rounded-xl text-xs font-bold shadow-sm">
+              Keep Note
+            </button>
+          </div>
+        </div>
+
+        <!-- Composer Interactive Poll Container -->
+        <div id="composer-poll-container" class="hidden bg-slate-100/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-brand-500"></i> Class Poll
+            </span>
+            <button onclick="toggleComposerPoll(false)" class="text-slate-400 hover:text-slate-600">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <input id="poll-question-input" type="text" placeholder="Poll question (e.g. Best study spot?)" class="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+          <div class="space-y-1.5">
+            <input id="poll-opt-1" type="text" placeholder="Option 1" class="w-full px-3 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+            <input id="poll-opt-2" type="text" placeholder="Option 2" class="w-full px-3 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+          </div>
+        </div>
+
+        <!-- Composer Bottom Toolbar Actions -->
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-800/70 flex items-center justify-between gap-1 flex-wrap">
+          
+          <div class="flex items-center gap-1">
+            <!-- Pick Device File (Every File Type: Image, Video, Audio, PDF, etc.) -->
+            <label for="device-file-input" class="p-2 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-slate-800 dark:text-slate-400 cursor-pointer transition-colors" title="Attach file from device">
+              <i data-lucide="paperclip" class="w-4 h-4"></i>
+              <input type="file" id="device-file-input" accept="*/*" class="hidden" onchange="handleDeviceFilePicked(event)">
+            </label>
+
+            <!-- Voice Note Trigger -->
+            <button onclick="toggleComposerVoiceRecording()" type="button" class="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors" title="Record Voice Note">
+              <i data-lucide="mic" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Poll Trigger -->
+            <button onclick="toggleComposerPoll()" type="button" class="p-2 rounded-xl text-slate-500 hover:text-campus-amber hover:bg-amber-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-colors" title="Add Poll">
+              <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Quick Channel Tag Pill -->
+            <button onclick="insertQuickTag('#HomeworkHelp')" type="button" class="px-2 py-1 rounded-xl text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-brand-600">
+              #Homework
+            </button>
+          </div>
+
+          <button onclick="publishPost()" class="px-4 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold text-xs rounded-2xl shadow-glow active:scale-95 transition-all flex items-center gap-1.5">
+            <span>Pulse</span>
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+      </section>
+
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-1.5 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-2xl text-xs font-bold">
+          <button onclick="setFeedTab('all')" id="tab-all" class="px-3 py-1 rounded-xl bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm transition-all">
+            All Pulses
+          </button>
+          <button onclick="setFeedTab('homework')" id="tab-homework" class="px-3 py-1 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all">
+            Homework
+          </button>
+          <button onclick="setFeedTab('polls')" id="tab-polls" class="px-3 py-1 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all">
+            Polls
+          </button>
+        </div>
+
+        <button onclick="refreshFeed()" class="p-1.5 rounded-xl text-slate-400 hover:text-brand-600 transition-colors" title="Refresh Feed">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <section id="posts-stream" class="space-y-3.5">
+        <!-- Rendered dynamically by JavaScript -->
+      </section>
+
+    </main>
+
+    <nav id="mobile-bottom-nav" class="absolute bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-lg">
+      <div class="flex items-center justify-around max-w-sm mx-auto">
+        
+        <!-- Feed Tab -->
+        <button onclick="setActiveNav('feed')" id="bottom-nav-feed" class="flex flex-col items-center justify-center flex-1 py-1 text-brand-600 dark:text-brand-400 font-bold transition-all">
+          <i data-lucide="home" class="w-5 h-5"></i>
+          <span class="text-[10px] mt-0.5">Feed</span>
+        </button>
+
+        <!-- Study Channels Tab -->
+        <button onclick="setActiveNav('study')" id="bottom-nav-study" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-brand-600 transition-all">
+          <i data-lucide="book-open" class="w-5 h-5"></i>
+          <span class="text-[10px] mt-0.5">Study</span>
+        </button>
+
+        <!-- Center Action Button: New Pulse -->
+        <button onclick="focusComposer()" class="flex flex-col items-center justify-center flex-1 -mt-5 group" title="New Pulse">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-campus-teal text-white flex items-center justify-center shadow-glow active:scale-95 group-hover:scale-105 transition-all ring-4 ring-white dark:ring-slate-900">
+            <i data-lucide="plus" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <span class="text-[9px] mt-0.5 font-extrabold text-slate-700 dark:text-slate-300">Pulse</span>
+        </button>
+
+        <!-- Homework Tab -->
+        <button onclick="setActiveNav('homework')" id="bottom-nav-homework" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-brand-600 transition-all">
+          <i data-lucide="help-circle" class="w-5 h-5"></i>
+          <span class="text-[10px] mt-0.5">Help</span>
+        </button>
+
+        <!-- Friends Chat Tab with Badge -->
+        <button onclick="toggleMessagesDrawer()" id="bottom-nav-chat" class="relative flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-brand-600 transition-all">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+          <span class="text-[10px] mt-0.5">Chat</span>
+          <span id="chat-nav-badge" class="hidden absolute top-1 right-3.5 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-white dark:ring-slate-900"></span>
+        </button>
+
+      </div>
+    </nav>
+
+    <div id="auth-modal" class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+      <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92%]">
+        
+        <!-- Header -->
+        <div class="px-5 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800 text-center">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-campus-teal text-white flex items-center justify-center mx-auto mb-2 shadow-glow">
+            <i data-lucide="zap" class="w-5 h-5 fill-white"></i>
+          </div>
+          <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Pulse School Network</h2>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Private campus community for classmates</p>
+
+          <!-- Tab Switcher -->
+          <div class="mt-3 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl grid grid-cols-2 gap-1 text-xs font-bold">
+            <button id="auth-tab-signin" onclick="setAuthTab('signin')" class="py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm transition-all">
+              Sign In
+            </button>
+            <button id="auth-tab-signup" onclick="setAuthTab('signup')" class="py-1.5 rounded-lg text-slate-600 dark:text-slate-400 transition-all">
+              Create Account
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 overflow-y-auto space-y-3.5">
+          <!-- Sign In Form -->
+          <div id="auth-signin-form" class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Student Handle</label>
+              <input id="signin-handle" type="text" placeholder="@yourhandle" class="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Passcode PIN</label>
+              <input id="signin-pin" type="password" placeholder="••••" class="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+
+            <!-- Quick switch classmate profiles on this device -->
+            <div id="quick-signin-container" class="hidden pt-1">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Switch Classmate</span>
+              <div id="quick-signin-list" class="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto"></div>
+            </div>
+
+            <button onclick="handleSignInSubmit()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold rounded-xl text-xs shadow-glow transition-all">
+              Sign In to Campus
+            </button>
+          </div>
+
+          <!-- Sign Up Form (Create Account) -->
+          <div id="auth-signup-form" class="hidden space-y-2.5">
+            <!-- Custom Device Avatar Picker -->
+            <div class="flex items-center gap-3">
+              <label for="signup-avatar-input" class="cursor-pointer relative w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden group">
+                <img id="signup-avatar-preview" src="https://api.dicebear.com/7.x/bottts/svg?seed=student" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i data-lucide="camera" class="w-4 h-4"></i>
+                </div>
+                <input type="file" id="signup-avatar-input" accept="image/*" class="hidden" onchange="handleAuthAvatarPicked(event)">
+              </label>
+              <div>
+                <label for="signup-avatar-input" class="cursor-pointer text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline block">Choose Photo</label>
+                <p class="text-[10px] text-slate-400">Pick from device gallery</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+                <input id="signup-name" type="text" placeholder="Alex Rivera" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Handle</label>
+                <input id="signup-handle" type="text" placeholder="alex_r" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Grade / Class</label>
+                <input id="signup-grade" type="text" placeholder="10th Grade" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Passcode PIN</label>
+                <input id="signup-pin" type="password" placeholder="4 digits" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Short Bio</label>
+              <input id="signup-bio" type="text" placeholder="Science lover, soccer team ⚽" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+            </div>
+
+            <button onclick="handleSignUpSubmit()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold rounded-xl text-xs shadow-glow transition-all">
+              Create Student Account
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="profile-modal" class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden">
+      <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Student Profile</h3>
+          <button onclick="closeProfileModal()" class="p-1 rounded-xl text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <img id="profile-edit-avatar-preview" src="https://api.dicebear.com/7.x/bottts/svg?seed=student" class="w-14 h-14 rounded-2xl object-cover ring-2 ring-brand-500">
+          <div>
+            <label for="profile-edit-avatar-input" class="cursor-pointer px-3 py-1 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 text-xs font-bold hover:bg-brand-100 inline-block">
+              Change Photo
+            </label>
+            <input type="file" id="profile-edit-avatar-input" accept="image/*" class="hidden" onchange="handleProfileAvatarPicked(event)">
+            <p class="text-[10px] text-slate-400 mt-0.5">Pick from device gallery</p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+          <input id="profile-edit-name" type="text" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Grade / Class</label>
+          <input id="profile-edit-grade" type="text" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Bio</label>
+          <textarea id="profile-edit-bio" rows="2" class="w-full px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <button onclick="promptDeleteAccount()" class="text-xs font-bold text-rose-500 hover:text-rose-700">Delete Account</button>
+          <div class="flex items-center gap-2">
+            <button onclick="signOutUser()" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">Sign Out</button>
+            <button onclick="saveProfileChanges()" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-glow">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="delete-confirm-modal" class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
+      <div class="w-full max-w-xs bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-rose-200 dark:border-rose-900/60 p-5 space-y-3.5 text-center">
+        <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center mx-auto">
+          <i data-lucide="trash-2" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Delete Student Account?</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          This will wipe your profile, pulses, and comments permanently.
+        </p>
+        <div class="flex items-center justify-center gap-2 pt-1">
+          <button onclick="closeDeleteConfirmModal()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">Cancel</button>
+          <button onclick="executeDeleteAccount()" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="story-viewer-modal" class="absolute inset-0 z-50 flex items-center justify-center bg-black hidden">
+      <div class="relative w-full h-full flex flex-col justify-between overflow-hidden">
+        
+        <!-- Story Progress Bar -->
+        <div id="story-progress-bar" class="absolute top-3 inset-x-4 z-20 flex items-center gap-1.5">
+          <div class="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
+            <div id="story-progress-inner" class="h-full bg-white transition-all duration-100" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Story User Header -->
+        <div class="absolute top-7 inset-x-4 z-20 flex items-center justify-between text-white">
+          <div class="flex items-center gap-2">
+            <img id="story-avatar" src="" class="w-7 h-7 rounded-full object-cover ring-2 ring-brand-500">
+            <div>
+              <p id="story-author-name" class="font-bold text-xs drop-shadow"></p>
+              <p id="story-time-ago" class="text-[10px] text-slate-300 drop-shadow"></p>
+            </div>
+          </div>
+          <button onclick="closeStoryViewer()" class="p-1 rounded-full bg-black/40 text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Story Media -->
+        <div class="relative flex-1 flex items-center justify-center bg-black">
+          <img id="story-image-display" src="" class="hidden max-h-full max-w-full object-contain">
+          <video id="story-video-display" playsinline autoplay muted class="hidden max-h-full max-w-full object-contain"></video>
+
+          <!-- Tap Nav Handlers -->
+          <div class="absolute inset-y-0 left-0 w-1/3 z-10 cursor-pointer" onclick="advanceStory(-1)"></div>
+          <div class="absolute inset-y-0 right-0 w-1/3 z-10 cursor-pointer" onclick="advanceStory(1)"></div>
+        </div>
+
+        <!-- Story Footer & Reactions -->
+        <div class="relative z-20 p-4 bg-gradient-to-t from-black/90 to-transparent space-y-2">
+          <p id="story-caption" class="text-xs text-white text-center font-medium drop-shadow"></p>
+          <div class="flex items-center justify-center gap-4 text-xl">
+            <button onclick="reactToStory('🔥')" class="hover:scale-125 transition-transform">🔥</button>
+            <button onclick="reactToStory('👏')" class="hover:scale-125 transition-transform">👏</button>
+            <button onclick="reactToStory('❤️')" class="hover:scale-125 transition-transform">❤️</button>
+            <button onclick="reactToStory('😂')" class="hover:scale-125 transition-transform">😂</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="messages-drawer" class="absolute inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col transform translate-x-full transition-transform duration-300">
+      
+      <!-- Chat Header -->
+      <div class="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMessagesDrawer()" class="p-1 rounded-xl text-slate-500 hover:text-slate-800">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </button>
+          <div>
+            <h3 class="font-extrabold text-xs text-slate-900 dark:text-white">Friends Chat</h3>
+            <p id="active-chat-partner-name" class="text-[10px] text-brand-600 dark:text-brand-400">Select classmate</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Classmates Quick Selection Pills -->
+      <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto" id="chat-classmates-tabs"></div>
+
+      <!-- Messages History Container -->
+      <div id="chat-messages-container" class="flex-1 p-3 overflow-y-auto space-y-2.5"></div>
+
+      <!-- Chat Attachment Preview -->
+      <div id="chat-attachment-bar" class="hidden px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <span id="chat-attachment-name" class="text-xs truncate text-slate-700 dark:text-slate-300"></span>
+        <button onclick="clearChatAttachment()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Chat Live Voice Recording Bar -->
+      <div id="chat-voice-bar" class="hidden px-3 py-2 bg-rose-50 dark:bg-rose-950/40 border-t border-rose-200 dark:border-rose-900 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+          <span id="chat-voice-timer" class="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">00:00</span>
+          <span class="text-[10px] text-slate-500">Recording...</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="cancelChatVoiceRecording()" class="p-1 text-slate-500 hover:text-slate-700 text-xs">
+            Cancel
+          </button>
+          <button onclick="sendChatVoiceRecording()" class="px-2.5 py-1 bg-rose-600 text-white rounded-xl text-xs font-bold shadow-sm">
+            Send
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="p-2.5 border-t border-slate-200 dark:border-slate-800 flex items-center gap-1.5 bg-white dark:bg-slate-900">
+        <!-- Pick file from device storage -->
+        <label for="chat-device-file-input" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer" title="Send file">
+          <i data-lucide="paperclip" class="w-4 h-4"></i>
+          <input type="file" id="chat-device-file-input" accept="*/*" class="hidden" onchange="handleChatFilePicked(event)">
+        </label>
+
+        <input id="chat-text-input" onkeydown="if(event.key==='Enter') sendChatMessage()" type="text" placeholder="Message classmate..." class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none text-slate-800 dark:text-slate-100">
+
+        <!-- Voice Message Button in Chat -->
+        <button onclick="toggleChatVoiceRecorder()" class="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 text-slate-600 hover:text-rose-600 transition-colors" title="Voice Message">
+          <i data-lucide="mic" class="w-4 h-4"></i>
+        </button>
+
+        <button onclick="sendChatMessage()" class="p-2 bg-brand-600 text-white rounded-xl hover:bg-brand-700 active:scale-95 shadow-glow">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <div id="notifications-drawer" class="absolute inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col transform translate-x-full transition-transform duration-300">
+      <div class="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+          <i data-lucide="bell" class="w-3.5 h-3.5 text-brand-500"></i>
+          <span>Campus Alerts</span>
+        </h3>
+        <button onclick="toggleNotificationsDrawer()" class="p-1 text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="notifications-list" class="flex-1 p-3 overflow-y-auto space-y-2"></div>
+      <div class="p-2.5 border-t border-slate-100 dark:border-slate-800 text-center">
+        <button onclick="clearAllNotifications()" class="text-xs font-bold text-slate-400 hover:text-slate-600">Clear All</button>
+      </div>
+    </div>
+
+    <!-- Toast Alert Container -->
+    <div id="toast-container" class="absolute bottom-16 inset-x-4 z-50 flex flex-col gap-1.5 pointer-events-none items-center"></div>
+
+  </div> <!-- Close #phone-frame -->
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* Global App State */
+    let currentUser = null;
+    let registeredUsers = [];
+    let postsList = [];
+    let storiesList = [];
+    let chatMessages = [];
+    let notificationsList = [];
+    let activeChatFriendId = null;
+    let activeFeedTab = 'all';
+    let searchQuery = '';
+
+    // Active media & recorder variables
+    let composerMediaAttachment = null;
+    let composerVoiceNoteBlob = null;
+    let mediaRecorderInstance = null;
+    let recordingTimerInterval = null;
+    let recordingSeconds = 0;
+    let recordedAudioChunks = [];
+    let chatVoiceRecorderInstance = null;
+    let chatVoiceSeconds = 0;
+    let chatVoiceInterval = null;
+    let chatAudioChunks = [];
+    let chatMediaAttachment = null;
+
+    // Stories viewer state
+    let activeStoryIndex = 0;
+    let storyProgressInterval = null;
+
+    // Cloud Database references
+    let db = null;
+    let auth = null;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'pulse-school-hub';
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 440, type = 'sine', duration = 0.15) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function soundPop() { playBeep(520, 'sine', 0.1); }
+    function soundLike() { playBeep(740, 'triangle', 0.18); }
+    function soundSend() { playBeep(640, 'sine', 0.12); }
+
+    async function initDatabase() {
+      try {
+        if (typeof __firebase_config !== 'undefined') {
+          const config = JSON.parse(__firebase_config);
+          const app = initializeApp(config);
+          db = getFirestore(app);
+          auth = getAuth(app);
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          // Real-time synchronization for school network data
+          const publicCollection = collection(db, 'artifacts', appId, 'public', 'data', 'pulseData');
+          onSnapshot(publicCollection, (snapshot) => {
+            snapshot.forEach(docSnap => {
+              const data = docSnap.data();
+              if (docSnap.id === 'users' && data.list) {
+                registeredUsers = data.list;
+                updateClassmatePickers();
+              }
+              if (docSnap.id === 'posts' && data.list) {
+                postsList = data.list;
+                renderPostsFeed();
+              }
+              if (docSnap.id === 'stories' && data.list) {
+                storiesList = data.list;
+                renderStoriesCarousel();
+              }
+              if (docSnap.id === 'chats' && data.list) {
+                chatMessages = data.list;
+                renderChatMessages();
+              }
+            });
+          }, (err) => {
+            console.debug('Real-time sync note:', err.message);
+          });
+        }
+      } catch (err) {
+        console.debug('Offline / local fallback active:', err.message);
+      }
+    }
+
+    async function syncToCloud(key, data) {
+      if (!db || !auth || !auth.currentUser) return;
+      try {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'pulseData', key);
+        await setDoc(docRef, { list: data }, { merge: true });
+      } catch (err) {
+        console.debug('Cloud sync err:', err.message);
+      }
+    }
+
+    function toast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toastEl = document.createElement('div');
+      toastEl.className = `px-3.5 py-2 rounded-2xl text-xs font-bold text-white shadow-xl flex items-center gap-2 transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto ${
+        type === 'error' ? 'bg-rose-600' : type === 'success' ? 'bg-emerald-600' : 'bg-slate-900 dark:bg-slate-800'
+      }`;
+      toastEl.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toastEl);
+
+      requestAnimationFrame(() => {
+        toastEl.classList.remove('translate-y-4', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toastEl.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toastEl.remove(), 300);
+      }, 2600);
+    }
+
+    function openAuthModal() {
+      document.getElementById('auth-modal').classList.remove('hidden');
+      updateClassmatePickers();
+      lucide.createIcons();
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+    }
+
+    function setAuthTab(tab) {
+      const signinBtn = document.getElementById('auth-tab-signin');
+      const signupBtn = document.getElementById('auth-tab-signup');
+      const signinForm = document.getElementById('auth-signin-form');
+      const signupForm = document.getElementById('auth-signup-form');
+
+      if (tab === 'signin') {
+        signinBtn.className = 'py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm transition-all';
+        signupBtn.className = 'py-1.5 rounded-lg text-slate-600 dark:text-slate-400 transition-all';
+        signinForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      } else {
+        signupBtn.className = 'py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm transition-all';
+        signinBtn.className = 'py-1.5 rounded-lg text-slate-600 dark:text-slate-400 transition-all';
+        signupForm.classList.remove('hidden');
+        signinForm.classList.add('hidden');
+      }
+    }
+
+    let signupAvatarBase64 = null;
+    function handleAuthAvatarPicked(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 200, (base64) => {
+        signupAvatarBase64 = base64;
+        document.getElementById('signup-avatar-preview').src = base64;
+      });
+    }
+
+    function handleSignUpSubmit() {
+      const name = document.getElementById('signup-name').value.trim();
+      let handle = document.getElementById('signup-handle').value.trim().toLowerCase();
+      const grade = document.getElementById('signup-grade').value.trim();
+      const pin = document.getElementById('signup-pin').value.trim();
+      const bio = document.getElementById('signup-bio').value.trim();
+
+      if (!name || !handle || !pin) {
+        toast('Please fill name, handle, and 4-digit PIN', 'error');
+        return;
+      }
+
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      if (registeredUsers.some(u => u.handle.toLowerCase() === handle)) {
+        toast('That student handle is already taken!', 'error');
+        return;
+      }
+
+      const newUser = {
+        id: 'user_' + Date.now(),
+        name,
+        handle,
+        grade: grade || 'High School',
+        pin,
+        bio: bio || 'School friend',
+        avatar: signupAvatarBase64 || `https://api.dicebear.com/7.x/bottts/svg?seed=${handle}`
+      };
+
+      registeredUsers.push(newUser);
+      syncToCloud('users', registeredUsers);
+      setCurrentUser(newUser);
+      closeAuthModal();
+      toast(`Welcome to Pulse, ${name}! 🎉`, 'success');
+      soundPop();
+    }
+
+    function handleSignInSubmit() {
+      let handle = document.getElementById('signin-handle').value.trim().toLowerCase();
+      const pin = document.getElementById('signin-pin').value.trim();
+
+      if (!handle || !pin) {
+        toast('Please enter your handle and PIN', 'error');
+        return;
+      }
+
+      if (!handle.startsWith('@')) handle = '@' + handle;
+
+      const user = registeredUsers.find(u => u.handle.toLowerCase() === handle && u.pin === pin);
+      if (!user) {
+        toast('Incorrect student handle or passcode PIN', 'error');
+        return;
+      }
+
+      setCurrentUser(user);
+      closeAuthModal();
+      toast(`Signed in as ${user.name}`, 'success');
+      soundPop();
+    }
+
+    function setCurrentUser(user) {
+      currentUser = user;
+      document.getElementById('header-avatar-img').src = user.avatar;
+      document.getElementById('composer-avatar-img').src = user.avatar;
+      renderPostsFeed();
+      renderStoriesCarousel();
+      renderChatClassmatesTabs();
+      updateClassmatePickers();
+    }
+
+    function signOutUser() {
+      currentUser = null;
+      document.getElementById('header-avatar-img').src = 'https://api.dicebear.com/7.x/bottts/svg?seed=guest';
+      document.getElementById('composer-avatar-img').src = 'https://api.dicebear.com/7.x/bottts/svg?seed=guest';
+      closeProfileModal();
+      openAuthModal();
+      toast('Signed out from Pulse');
+    }
+
+    function updateClassmatePickers() {
+      const container = document.getElementById('quick-signin-container');
+      const list = document.getElementById('quick-signin-list');
+      if (!container || !list) return;
+
+      if (registeredUsers.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      list.innerHTML = registeredUsers.map(u => `
+        <button onclick="quickSelectStudent('${u.handle}')" class="px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-slate-700 text-[11px] font-bold text-slate-800 dark:text-slate-200 hover:bg-brand-500 hover:text-white transition-all flex items-center gap-1.5">
+          <img src="${u.avatar}" class="w-3.5 h-3.5 rounded-full object-cover">
+          <span>${u.handle}</span>
+        </button>
+      `).join('');
+    }
+
+    function quickSelectStudent(handle) {
+      document.getElementById('signin-handle').value = handle;
+      document.getElementById('signin-pin').focus();
+    }
+
+    function handleHeaderAvatarClick() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+      openProfileModal();
+    }
+
+    function openProfileModal() {
+      if (!currentUser) return;
+      document.getElementById('profile-edit-name').value = currentUser.name;
+      document.getElementById('profile-edit-grade').value = currentUser.grade;
+      document.getElementById('profile-edit-bio').value = currentUser.bio;
+      document.getElementById('profile-edit-avatar-preview').src = currentUser.avatar;
+      document.getElementById('profile-modal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profile-modal').classList.add('hidden');
+    }
+
+    let editAvatarBase64 = null;
+    function handleProfileAvatarPicked(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 200, (base64) => {
+        editAvatarBase64 = base64;
+        document.getElementById('profile-edit-avatar-preview').src = base64;
+      });
+    }
+
+    function saveProfileChanges() {
+      if (!currentUser) return;
+      currentUser.name = document.getElementById('profile-edit-name').value.trim() || currentUser.name;
+      currentUser.grade = document.getElementById('profile-edit-grade').value.trim() || currentUser.grade;
+      currentUser.bio = document.getElementById('profile-edit-bio').value.trim() || currentUser.bio;
+      if (editAvatarBase64) currentUser.avatar = editAvatarBase64;
+
+      const idx = registeredUsers.findIndex(u => u.id === currentUser.id);
+      if (idx !== -1) registeredUsers[idx] = currentUser;
+      syncToCloud('users', registeredUsers);
+      setCurrentUser(currentUser);
+      closeProfileModal();
+      toast('Profile updated!', 'success');
+    }
+
+    function promptDeleteAccount() {
+      closeProfileModal();
+      document.getElementById('delete-confirm-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteConfirmModal() {
+      document.getElementById('delete-confirm-modal').classList.add('hidden');
+    }
+
+    function executeDeleteAccount() {
+      if (!currentUser) return;
+      const uid = currentUser.id;
+      registeredUsers = registeredUsers.filter(u => u.id !== uid);
+      postsList = postsList.filter(p => p.authorId !== uid);
+      storiesList = storiesList.filter(s => s.authorId !== uid);
+      syncToCloud('users', registeredUsers);
+      syncToCloud('posts', postsList);
+      syncToCloud('stories', storiesList);
+      closeDeleteConfirmModal();
+      signOutUser();
+      toast('Account permanently deleted', 'info');
+    }
+
+    function compressImage(file, maxSize, callback) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > maxSize) { h = Math.round((h * maxSize) / w); w = maxSize; }
+          } else {
+            if (h > maxSize) { w = Math.round((w * maxSize) / h); h = maxSize; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleDeviceFilePicked(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const previewBox = document.getElementById('composer-attachment-preview');
+      const imgEl = document.getElementById('preview-image');
+      const vidEl = document.getElementById('preview-video');
+      const audEl = document.getElementById('preview-audio');
+      const docEl = document.getElementById('preview-doc');
+
+      // Reset views
+      previewBox.classList.remove('hidden');
+      imgEl.classList.add('hidden');
+      vidEl.classList.add('hidden');
+      audEl.classList.add('hidden');
+      docEl.classList.add('hidden');
+
+      if (file.type.startsWith('image/')) {
+        compressImage(file, 900, (base64) => {
+          composerMediaAttachment = { type: 'image', data: base64, name: file.name };
+          imgEl.src = base64;
+          imgEl.classList.remove('hidden');
+        });
+      } else if (file.type.startsWith('video/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          composerMediaAttachment = { type: 'video', data: ev.target.result, name: file.name };
+          vidEl.src = ev.target.result;
+          vidEl.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else if (file.type.startsWith('audio/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          composerMediaAttachment = { type: 'audio', data: ev.target.result, name: file.name };
+          document.getElementById('preview-audio-name').textContent = file.name;
+          document.getElementById('preview-audio-player').src = ev.target.result;
+          audEl.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // Document / PDF / Homework File
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          composerMediaAttachment = { type: 'document', data: ev.target.result, name: file.name, size: (file.size/1024).toFixed(1) + ' KB' };
+          document.getElementById('preview-doc-name').textContent = file.name;
+          document.getElementById('preview-doc-size').textContent = (file.size/1024).toFixed(1) + ' KB';
+          docEl.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+      lucide.createIcons();
+    }
+
+    function clearComposerAttachment() {
+      composerMediaAttachment = null;
+      document.getElementById('composer-attachment-preview').classList.add('hidden');
+      document.getElementById('device-file-input').value = '';
+    }
+
+    async function toggleComposerVoiceRecording() {
+      const voiceBar = document.getElementById('composer-voice-bar');
+      if (!mediaRecorderInstance || mediaRecorderInstance.state === 'inactive') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          recordedAudioChunks = [];
+          mediaRecorderInstance = new MediaRecorder(stream);
+          mediaRecorderInstance.ondataavailable = e => recordedAudioChunks.push(e.data);
+          mediaRecorderInstance.onstop = () => {
+            const blob = new Blob(recordedAudioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = () => {
+              composerVoiceNoteBlob = reader.result;
+            };
+            reader.readAsDataURL(blob);
+          };
+
+          mediaRecorderInstance.start();
+          voiceBar.classList.remove('hidden');
+          recordingSeconds = 0;
+          recordingTimerInterval = setInterval(() => {
+            recordingSeconds++;
+            const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+            const secs = String(recordingSeconds % 60).padStart(2, '0');
+            document.getElementById('composer-voice-timer').textContent = `${mins}:${secs}`;
+          }, 1000);
+        } catch (err) {
+          // Fallback simulation if mic is unavailable or blocked in iframe
+          simulateComposerVoiceNote();
+        }
+      } else {
+        saveComposerVoiceNote();
+      }
+    }
+
+    function simulateComposerVoiceNote() {
+      const voiceBar = document.getElementById('composer-voice-bar');
+      voiceBar.classList.remove('hidden');
+      recordingSeconds = 0;
+      recordingTimerInterval = setInterval(() => {
+        recordingSeconds++;
+        const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+        const secs = String(recordingSeconds % 60).padStart(2, '0');
+        document.getElementById('composer-voice-timer').textContent = `${mins}:${secs}`;
+        if (recordingSeconds >= 4) {
+          saveComposerVoiceNote();
+        }
+      }, 1000);
+    }
+
+    function saveComposerVoiceNote() {
+      clearInterval(recordingTimerInterval);
+      if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
+        mediaRecorderInstance.stop();
+      }
+      document.getElementById('composer-voice-bar').classList.add('hidden');
+      if (!composerVoiceNoteBlob) {
+        // Fallback tone for simulation
+        composerVoiceNoteBlob = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
+      }
+      toast('Voice note recorded and attached! 🎙️', 'success');
+    }
+
+    function cancelComposerVoiceNote() {
+      clearInterval(recordingTimerInterval);
+      if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
+        mediaRecorderInstance.stop();
+      }
+      composerVoiceNoteBlob = null;
+      document.getElementById('composer-voice-bar').classList.add('hidden');
+    }
+
+    function toggleComposerPoll(force) {
+      const box = document.getElementById('composer-poll-container');
+      if (force !== undefined) {
+        box.classList.toggle('hidden', !force);
+      } else {
+        box.classList.toggle('hidden');
+      }
+      lucide.createIcons();
+    }
+
+    function insertQuickTag(tag) {
+      const txt = document.getElementById('composer-text');
+      txt.value = (txt.value ? txt.value + ' ' : '') + tag + ' ';
+      txt.focus();
+    }
+
+    function focusComposer() {
+      setActiveNav('feed');
+      document.getElementById('composer-text').focus();
+      document.getElementById('main-scroll-area').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function publishPost() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const text = document.getElementById('composer-text').value.trim();
+      const pollBox = document.getElementById('composer-poll-container');
+      let pollData = null;
+
+      if (!pollBox.classList.contains('hidden')) {
+        const q = document.getElementById('poll-question-input').value.trim();
+        const o1 = document.getElementById('poll-opt-1').value.trim();
+        const o2 = document.getElementById('poll-opt-2').value.trim();
+        if (q && o1 && o2) {
+          pollData = {
+            question: q,
+            options: [
+              { text: o1, votes: 0, voters: [] },
+              { text: o2, votes: 0, voters: [] }
+            ]
+          };
+        }
+      }
+
+      if (!text && !composerMediaAttachment && !composerVoiceNoteBlob && !pollData) {
+        toast('Type a pulse, ask homework, or attach media!', 'error');
+        return;
+      }
+
+      const newPost = {
+        id: 'post_' + Date.now(),
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        authorHandle: currentUser.handle,
+        authorAvatar: currentUser.avatar,
+        grade: currentUser.grade,
+        timestamp: 'Just now',
+        text,
+        attachment: composerMediaAttachment,
+        voiceNote: composerVoiceNoteBlob,
+        poll: pollData,
+        likes: [],
+        bookmarks: [],
+        comments: []
+      };
+
+      postsList.unshift(newPost);
+      syncToCloud('posts', postsList);
+      renderPostsFeed();
+
+      // Reset composer inputs
+      document.getElementById('composer-text').value = '';
+      clearComposerAttachment();
+      cancelComposerVoiceNote();
+      toggleComposerPoll(false);
+      document.getElementById('poll-question-input').value = '';
+      document.getElementById('poll-opt-1').value = '';
+      document.getElementById('poll-opt-2').value = '';
+
+      soundSend();
+      toast('Pulse posted to campus! 🚀', 'success');
+    }
+
+    function toggleLike(postId) {
+      if (!currentUser) { openAuthModal(); return; }
+      const post = postsList.find(p => p.id === postId);
+      if (!post) return;
+
+      const idx = post.likes.indexOf(currentUser.id);
+      if (idx === -1) {
+        post.likes.push(currentUser.id);
+        soundLike();
+        if (post.authorId !== currentUser.id) {
+          addNotification(`${currentUser.name} liked your pulse! ❤️`);
+        }
+      } else {
+        post.likes.splice(idx, 1);
+      }
+      syncToCloud('posts', postsList);
+      renderPostsFeed();
+    }
+
+    function toggleBookmark(postId) {
+      if (!currentUser) { openAuthModal(); return; }
+      const post = postsList.find(p => p.id === postId);
+      if (!post) return;
+
+      const idx = post.bookmarks.indexOf(currentUser.id);
+      if (idx === -1) {
+        post.bookmarks.push(currentUser.id);
+        toast('Saved to your study bookmarks');
+      } else {
+        post.bookmarks.splice(idx, 1);
+        toast('Removed from bookmarks');
+      }
+      syncToCloud('posts', postsList);
+      renderPostsFeed();
+    }
+
+    function deletePost(postId) {
+      postsList = postsList.filter(p => p.id !== postId);
+      syncToCloud('posts', postsList);
+      renderPostsFeed();
+      toast('Pulse removed');
+    }
+
+    function votePoll(postId, optionIdx) {
+      if (!currentUser) { openAuthModal(); return; }
+      const post = postsList.find(p => p.id === postId);
+      if (!post || !post.poll) return;
+
+      // Check if already voted
+      const alreadyVoted = post.poll.options.some(opt => opt.voters.includes(currentUser.id));
+      if (alreadyVoted) {
+        toast('You already voted on this poll', 'info');
+        return;
+      }
+
+      post.poll.options[optionIdx].votes++;
+      post.poll.options[optionIdx].voters.push(currentUser.id);
+      syncToCloud('posts', postsList);
+      renderPostsFeed();
+      soundPop();
+      toast('Vote counted! 📊');
+    }
+
+    function submitComment(postId) {
+      if (!currentUser) { openAuthModal(); return; }
+      const input = document.getElementById(`comment-input-${postId}`);
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const post = postsList.find(p => p.id === postId);
+      if (!post) return;
+
+      post.comments.push({
+        id: 'c_' + Date.now(),
+        authorName: currentUser.name,
+        authorHandle: currentUser.handle,
+        authorAvatar: currentUser.avatar,
+        text,
+        timestamp: 'Just now'
+      });
+
+      input.value = '';
+      syncToCloud('posts', postsList);
+      renderPostsFeed();
+      soundSend();
+
+      if (post.authorId !== currentUser.id) {
+        addNotification(`${currentUser.name} commented on your pulse: "${text.substring(0, 20)}..."`);
+      }
+    }
+
+    function toggleComments(postId) {
+      const box = document.getElementById(`comments-box-${postId}`);
+      if (box) box.classList.toggle('hidden');
+      lucide.createIcons();
+    }
+
+    function setFeedTab(tab) {
+      activeFeedTab = tab;
+      ['all', 'homework', 'polls'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = 'px-3 py-1 rounded-xl bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm transition-all';
+          } else {
+            btn.className = 'px-3 py-1 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all';
+          }
+        }
+      });
+      renderPostsFeed();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderPostsFeed();
+    }
+
+    function refreshFeed() {
+      soundPop();
+      renderPostsFeed();
+      toast('Feed refreshed');
+    }
+
+    function renderPostsFeed() {
+      const container = document.getElementById('posts-stream');
+      if (!container) return;
+
+      let filtered = [...postsList];
+
+      if (activeFeedTab === 'homework') {
+        filtered = filtered.filter(p => p.text.toLowerCase().includes('#homework') || (p.attachment && p.attachment.type === 'document'));
+      } else if (activeFeedTab === 'polls') {
+        filtered = filtered.filter(p => !!p.poll);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(p => 
+          p.text.toLowerCase().includes(searchQuery) ||
+          p.authorName.toLowerCase().includes(searchQuery) ||
+          p.authorHandle.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto">
+              <i data-lucide="zap" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xs font-bold text-slate-800 dark:text-slate-200">No pulses found</h3>
+            <p class="text-[11px] text-slate-400">Be the first student to start the conversation!</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(post => {
+        const isLiked = currentUser && post.likes.includes(currentUser.id);
+        const isBookmarked = currentUser && post.bookmarks.includes(currentUser.id);
+        const isAuthor = currentUser && post.authorId === currentUser.id;
+
+        // Total votes calculation for poll
+        let pollHtml = '';
+        if (post.poll) {
+          const totalVotes = post.poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+          pollHtml = `
+            <div class="my-2.5 p-3 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+              <p class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-brand-500"></i> ${post.poll.question}
+              </p>
+              <div class="space-y-1.5">
+                ${post.poll.options.map((opt, i) => {
+                  const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+                  const userVoted = currentUser && opt.voters.includes(currentUser.id);
+                  return `
+                    <button onclick="votePoll('${post.id}', ${i})" class="w-full text-left p-2 rounded-xl border ${userVoted ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/40' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'} relative overflow-hidden transition-all">
+                      <div class="absolute inset-y-0 left-0 bg-brand-500/15" style="width: ${pct}%"></div>
+                      <div class="relative flex items-center justify-between text-xs font-semibold px-1">
+                        <span class="${userVoted ? 'text-brand-600 dark:text-brand-400 font-bold' : 'text-slate-700 dark:text-slate-300'}">${opt.text}</span>
+                        <span class="text-[11px] text-slate-500">${pct}% (${opt.votes})</span>
+                      </div>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        // Attachment HTML
+        let attachHtml = '';
+        if (post.attachment) {
+          if (post.attachment.type === 'image') {
+            attachHtml = `<div class="my-2 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-black"><img src="${post.attachment.data}" class="w-full max-h-72 object-cover"></div>`;
+          } else if (post.attachment.type === 'video') {
+            attachHtml = `<div class="my-2 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-black"><video controls playsinline src="${post.attachment.data}" class="w-full max-h-72"></video></div>`;
+          } else if (post.attachment.type === 'audio') {
+            attachHtml = `
+              <div class="my-2 p-2.5 rounded-2xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-900 flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center flex-shrink-0">
+                  <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${post.attachment.name}</p>
+                  <audio controls src="${post.attachment.data}" class="w-full h-7 mt-1"></audio>
+                </div>
+              </div>
+            `;
+          } else if (post.attachment.type === 'document') {
+            attachHtml = `
+              <div class="my-2 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 truncate">
+                  <div class="w-8 h-8 rounded-xl bg-campus-emerald text-white flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                  </div>
+                  <div class="truncate">
+                    <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${post.attachment.name}</p>
+                    <span class="text-[10px] text-slate-400">${post.attachment.size || 'Attachment'}</span>
+                  </div>
+                </div>
+                <a href="${post.attachment.data}" download="${post.attachment.name}" class="px-2.5 py-1 bg-slate-200 hover:bg-brand-600 hover:text-white dark:bg-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                </a>
+              </div>
+            `;
+          }
+        }
+
+        // Voice Note Player HTML
+        let voiceHtml = '';
+        if (post.voiceNote) {
+          voiceHtml = `
+            <div class="my-2 p-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-xl bg-rose-600 text-white flex items-center justify-center flex-shrink-0">
+                <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+              </div>
+              <audio controls src="${post.voiceNote}" class="flex-1 h-7"></audio>
+            </div>
+          `;
+        }
+
+        // Highlight tags
+        const formattedText = post.text.replace(/(#\w+)/g, '<span class="text-brand-600 dark:text-brand-400 font-bold">$1</span>');
+
+        return `
+          <article class="bg-white dark:bg-slate-900 p-3.5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2.5">
+            <!-- Author Row -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <img src="${post.authorAvatar}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-brand-500/30">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <h4 class="text-xs font-extrabold text-slate-900 dark:text-white leading-tight">${post.authorName}</h4>
+                    <span class="text-[10px] font-semibold text-brand-600 dark:text-brand-400 px-1.5 py-0.2 bg-brand-50 dark:bg-brand-950/60 rounded-md">${post.grade || 'Student'}</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400">${post.authorHandle} • ${post.timestamp}</span>
+                </div>
+              </div>
+
+              ${isAuthor ? `
+                <button onclick="deletePost('${post.id}')" class="p-1 text-slate-400 hover:text-rose-500 transition-colors" title="Delete Pulse">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : ''}
+            </div>
+
+            <!-- Body -->
+            ${post.text ? `<p class="text-xs sm:text-[13px] text-slate-800 dark:text-slate-200 leading-relaxed">${formattedText}</p>` : ''}
+
+            <!-- Attachment & Poll -->
+            ${attachHtml}
+            ${voiceHtml}
+            ${pollHtml}
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80 text-slate-500 dark:text-slate-400">
+              <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-600 transition-colors ${isLiked ? 'text-rose-600 animate-heart-pop' : ''}">
+                <i data-lucide="heart" class="w-4 h-4 ${isLiked ? 'fill-rose-600 text-rose-600' : ''}"></i>
+                <span>${post.likes.length}</span>
+              </button>
+
+              <button onclick="toggleComments('${post.id}')" class="flex items-center gap-1.5 text-xs font-semibold hover:text-brand-600 transition-colors">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                <span>${post.comments.length}</span>
+              </button>
+
+              <button onclick="toggleBookmark('${post.id}')" class="flex items-center gap-1.5 text-xs font-semibold hover:text-campus-amber transition-colors ${isBookmarked ? 'text-campus-amber' : ''}">
+                <i data-lucide="bookmark" class="w-4 h-4 ${isBookmarked ? 'fill-campus-amber' : ''}"></i>
+              </button>
+            </div>
+
+            <!-- Comments Expandable Container -->
+            <div id="comments-box-${post.id}" class="hidden pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <div class="space-y-1.5 max-h-36 overflow-y-auto">
+                ${post.comments.map(c => `
+                  <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs space-y-0.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold">
+                      <span class="text-slate-700 dark:text-slate-300">${c.authorName}</span>
+                      <span>${c.timestamp}</span>
+                    </div>
+                    <p class="text-slate-700 dark:text-slate-200">${c.text}</p>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- Write Comment -->
+              <div class="flex items-center gap-1.5 pt-1">
+                <input id="comment-input-${post.id}" onkeydown="if(event.key==='Enter') submitComment('${post.id}')" type="text" placeholder="Reply to classmate..." class="flex-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none">
+                <button onclick="submitComment('${post.id}')" class="p-1.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700">
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+          </article>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function handleDeviceStoryPicked(e) {
+      if (!currentUser) { openAuthModal(); return; }
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.type.startsWith('image/')) {
+        compressImage(file, 1000, (base64) => {
+          uploadStoryRecord('image', base64);
+        });
+      } else if (file.type.startsWith('video/')) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          uploadStoryRecord('video', ev.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function uploadStoryRecord(type, data) {
+      const newStory = {
+        id: 'story_' + Date.now(),
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        authorAvatar: currentUser.avatar,
+        type,
+        data,
+        timestamp: 'Just now',
+        reactions: []
+      };
+      storiesList.unshift(newStory);
+      syncToCloud('stories', storiesList);
+      renderStoriesCarousel();
+      toast('Moment uploaded to stories! ✨', 'success');
+      soundPop();
+    }
+
+    function renderStoriesCarousel() {
+      const track = document.getElementById('stories-track');
+      if (!track) return;
+
+      track.innerHTML = storiesList.map((story, i) => `
+        <div onclick="openStoryViewer(${i})" class="flex flex-col items-center flex-shrink-0 cursor-pointer group">
+          <div class="w-14 h-14 rounded-2xl p-0.5 bg-gradient-to-tr from-brand-600 via-campus-rose to-campus-amber group-hover:scale-105 transition-transform">
+            <img src="${story.authorAvatar}" class="w-full h-full rounded-2xl object-cover border-2 border-white dark:border-slate-900">
+          </div>
+          <span class="text-[10px] font-semibold mt-1 text-slate-700 dark:text-slate-300 truncate w-14 text-center">${story.authorName.split(' ')[0]}</span>
+        </div>
+      `).join('');
+    }
+
+    function openStoryViewer(index) {
+      activeStoryIndex = index;
+      const modal = document.getElementById('story-viewer-modal');
+      modal.classList.remove('hidden');
+      loadActiveStory();
+    }
+
+    function loadActiveStory() {
+      if (activeStoryIndex < 0 || activeStoryIndex >= storiesList.length) {
+        closeStoryViewer();
+        return;
+      }
+      const story = storiesList[activeStoryIndex];
+      document.getElementById('story-avatar').src = story.authorAvatar;
+      document.getElementById('story-author-name').textContent = story.authorName;
+      document.getElementById('story-time-ago').textContent = story.timestamp;
+      document.getElementById('story-caption').textContent = `${story.authorName}'s story`;
+
+      const img = document.getElementById('story-image-display');
+      const vid = document.getElementById('story-video-display');
+
+      if (story.type === 'video') {
+        img.classList.add('hidden');
+        vid.src = story.data;
+        vid.classList.remove('hidden');
+        vid.play().catch(() => {});
+      } else {
+        vid.classList.add('hidden');
+        img.src = story.data;
+        img.classList.remove('hidden');
+      }
+
+      // Progress animation
+      clearInterval(storyProgressInterval);
+      let progress = 0;
+      const inner = document.getElementById('story-progress-inner');
+      inner.style.width = '0%';
+      storyProgressInterval = setInterval(() => {
+        progress += 2;
+        inner.style.width = progress + '%';
+        if (progress >= 100) {
+          advanceStory(1);
+        }
+      }, 100);
+      lucide.createIcons();
+    }
+
+    function advanceStory(direction) {
+      clearInterval(storyProgressInterval);
+      activeStoryIndex += direction;
+      if (activeStoryIndex < 0 || activeStoryIndex >= storiesList.length) {
+        closeStoryViewer();
+      } else {
+        loadActiveStory();
+      }
+    }
+
+    function reactToStory(emoji) {
+      soundPop();
+      toast(`Reacted with ${emoji}!`);
+      advanceStory(1);
+    }
+
+    function closeStoryViewer() {
+      clearInterval(storyProgressInterval);
+      const vid = document.getElementById('story-video-display');
+      vid.pause();
+      document.getElementById('story-viewer-modal').classList.add('hidden');
+    }
+
+    function toggleMessagesDrawer() {
+      const drawer = document.getElementById('messages-drawer');
+      const isOpen = !drawer.classList.contains('translate-x-full');
+      if (isOpen) {
+        drawer.classList.add('translate-x-full');
+      } else {
+        drawer.classList.remove('translate-x-full');
+        renderChatClassmatesTabs();
+        renderChatMessages();
+      }
+      lucide.createIcons();
+    }
+
+    function renderChatClassmatesTabs() {
+      const tabs = document.getElementById('chat-classmates-tabs');
+      if (!tabs) return;
+
+      const classmates = registeredUsers.filter(u => !currentUser || u.id !== currentUser.id);
+      if (classmates.length === 0) {
+        tabs.innerHTML = `<span class="text-[11px] text-slate-400">Invite school friends to join!</span>`;
+        return;
+      }
+
+      if (!activeChatFriendId && classmates.length > 0) {
+        activeChatFriendId = classmates[0].id;
+      }
+
+      tabs.innerHTML = classmates.map(friend => `
+        <button onclick="selectChatFriend('${friend.id}')" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 ${
+          activeChatFriendId === friend.id ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+        }">
+          <img src="${friend.avatar}" class="w-4 h-4 rounded-full object-cover">
+          <span>${friend.name.split(' ')[0]}</span>
+        </button>
+      `).join('');
+
+      const activeF = registeredUsers.find(u => u.id === activeChatFriendId);
+      if (activeF) {
+        document.getElementById('active-chat-partner-name').textContent = activeF.name;
+      }
+    }
+
+    function selectChatFriend(friendId) {
+      activeChatFriendId = friendId;
+      renderChatClassmatesTabs();
+      renderChatMessages();
+      soundPop();
+    }
+
+    function renderChatMessages() {
+      const container = document.getElementById('chat-messages-container');
+      if (!container) return;
+
+      if (!activeChatFriendId || !currentUser) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 space-y-1">
+            <i data-lucide="message-square" class="w-8 h-8 mx-auto text-slate-300"></i>
+            <p class="text-xs">Pick a classmate to chat</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      // Filter messages between currentUser and activeChatFriendId
+      const conversation = chatMessages.filter(m => 
+        (m.senderId === currentUser.id && m.receiverId === activeChatFriendId) ||
+        (m.senderId === activeChatFriendId && m.receiverId === currentUser.id)
+      );
+
+      if (conversation.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 text-xs">
+            Say hi to your study buddy! 👋
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = conversation.map(msg => {
+        const isMe = msg.senderId === currentUser.id;
+        let attachContent = '';
+        if (msg.attachment) {
+          if (msg.attachment.type === 'image') {
+            attachContent = `<img src="${msg.attachment.data}" class="rounded-xl max-h-40 my-1">`;
+          } else if (msg.attachment.type === 'voice') {
+            attachContent = `<audio controls src="${msg.attachment.data}" class="h-7 my-1 w-44"></audio>`;
+          } else {
+            attachContent = `
+              <a href="${msg.attachment.data}" download="${msg.attachment.name}" class="p-2 rounded-xl bg-black/10 dark:bg-white/10 flex items-center gap-2 text-xs font-bold underline my-1">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> ${msg.attachment.name}
+              </a>
+            `;
+          }
+        }
+
+        return `
+          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+            <div class="max-w-[78%] px-3 py-2 rounded-2xl text-xs ${
+              isMe ? 'bg-brand-600 text-white rounded-br-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none'
+            }">
+              ${msg.text ? `<p>${msg.text}</p>` : ''}
+              ${attachContent}
+            </div>
+            <span class="text-[9px] text-slate-400 mt-0.5 px-1">${msg.timestamp}</span>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function handleChatFilePicked(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const bar = document.getElementById('chat-attachment-bar');
+      const name = document.getElementById('chat-attachment-name');
+      bar.classList.remove('hidden');
+      name.textContent = file.name;
+
+      if (file.type.startsWith('image/')) {
+        compressImage(file, 600, base64 => {
+          chatMediaAttachment = { type: 'image', data: base64, name: file.name };
+        });
+      } else {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          chatMediaAttachment = { type: 'file', data: ev.target.result, name: file.name };
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function clearChatAttachment() {
+      chatMediaAttachment = null;
+      document.getElementById('chat-attachment-bar').classList.add('hidden');
+      document.getElementById('chat-device-file-input').value = '';
+    }
+
+    async function toggleChatVoiceRecorder() {
+      const bar = document.getElementById('chat-voice-bar');
+      if (!chatVoiceRecorderInstance || chatVoiceRecorderInstance.state === 'inactive') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          chatAudioChunks = [];
+          chatVoiceRecorderInstance = new MediaRecorder(stream);
+          chatVoiceRecorderInstance.ondataavailable = e => chatAudioChunks.push(e.data);
+          chatVoiceRecorderInstance.onstop = () => {
+            const blob = new Blob(chatAudioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = () => {
+              dispatchChatMessage('', { type: 'voice', data: reader.result, name: 'Voice Note' });
+            };
+            reader.readAsDataURL(blob);
+          };
+          chatVoiceRecorderInstance.start();
+          bar.classList.remove('hidden');
+          chatVoiceSeconds = 0;
+          chatVoiceInterval = setInterval(() => {
+            chatVoiceSeconds++;
+            const mins = String(Math.floor(chatVoiceSeconds / 60)).padStart(2, '0');
+            const secs = String(chatVoiceSeconds % 60).padStart(2, '0');
+            document.getElementById('chat-voice-timer').textContent = `${mins}:${secs}`;
+          }, 1000);
+        } catch (err) {
+          // Simulation fallback for voice note
+          bar.classList.remove('hidden');
+          chatVoiceSeconds = 0;
+          chatVoiceInterval = setInterval(() => {
+            chatVoiceSeconds++;
+            const mins = String(Math.floor(chatVoiceSeconds / 60)).padStart(2, '0');
+            const secs = String(chatVoiceSeconds % 60).padStart(2, '0');
+            document.getElementById('chat-voice-timer').textContent = `${mins}:${secs}`;
+            if (chatVoiceSeconds >= 3) {
+              sendChatVoiceRecording();
+            }
+          }, 1000);
+        }
+      } else {
+        sendChatVoiceRecording();
+      }
+    }
+
+    function sendChatVoiceRecording() {
+      clearInterval(chatVoiceInterval);
+      if (chatVoiceRecorderInstance && chatVoiceRecorderInstance.state !== 'inactive') {
+        chatVoiceRecorderInstance.stop();
+      } else {
+        // Fallback recorded data
+        dispatchChatMessage('', { type: 'voice', data: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=", name: 'Voice Note' });
+      }
+      document.getElementById('chat-voice-bar').classList.add('hidden');
+    }
+
+    function cancelChatVoiceRecording() {
+      clearInterval(chatVoiceInterval);
+      if (chatVoiceRecorderInstance && chatVoiceRecorderInstance.state !== 'inactive') {
+        chatVoiceRecorderInstance.stop();
+      }
+      document.getElementById('chat-voice-bar').classList.add('hidden');
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-text-input');
+      const text = input.value.trim();
+      if (!text && !chatMediaAttachment) return;
+      dispatchChatMessage(text, chatMediaAttachment);
+      input.value = '';
+      clearChatAttachment();
+    }
+
+    function dispatchChatMessage(text, attachment) {
+      if (!currentUser || !activeChatFriendId) {
+        toast('Select classmate to message', 'error');
+        return;
+      }
+
+      const msg = {
+        id: 'msg_' + Date.now(),
+        senderId: currentUser.id,
+        receiverId: activeChatFriendId,
+        text,
+        attachment,
+        timestamp: 'Just now'
+      };
+
+      chatMessages.push(msg);
+      syncToCloud('chats', chatMessages);
+      renderChatMessages();
+      soundSend();
+    }
+
+    function toggleNotificationsDrawer() {
+      const drawer = document.getElementById('notifications-drawer');
+      drawer.classList.toggle('translate-x-full');
+      document.getElementById('notif-badge').classList.add('hidden');
+      renderNotifications();
+      lucide.createIcons();
+    }
+
+    function addNotification(text) {
+      notificationsList.unshift({ id: 'n_' + Date.now(), text, time: 'Just now' });
+      document.getElementById('notif-badge').classList.remove('hidden');
+      renderNotifications();
+    }
+
+    function renderNotifications() {
+      const list = document.getElementById('notifications-list');
+      if (!list) return;
+      if (notificationsList.length === 0) {
+        list.innerHTML = `<p class="text-center text-slate-400 text-xs py-8">No new alerts</p>`;
+        return;
+      }
+      list.innerHTML = notificationsList.map(n => `
+        <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 text-xs space-y-0.5">
+          <p class="text-slate-800 dark:text-slate-200 font-medium">${n.text}</p>
+          <span class="text-[10px] text-slate-400">${n.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearAllNotifications() {
+      notificationsList = [];
+      renderNotifications();
+      toast('Notifications cleared');
+    }
+
+    function setActiveNav(tab) {
+      ['feed', 'study', 'homework'].forEach(t => {
+        const btn = document.getElementById(`bottom-nav-${t}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = 'flex flex-col items-center justify-center flex-1 py-1 text-brand-600 dark:text-brand-400 font-bold transition-all';
+          } else {
+            btn.className = 'flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-brand-600 transition-all';
+          }
+        }
+      });
+
+      if (tab === 'study') {
+        insertQuickTag('#StudyGroup');
+        setFeedTab('all');
+      } else if (tab === 'homework') {
+        setFeedTab('homework');
+      } else {
+        setFeedTab('all');
+      }
+    }
+
+    let isExpandedView = false;
+    function togglePhoneMode() {
+      isExpandedView = !isExpandedView;
+      const frame = document.getElementById('phone-frame');
+      const btn = document.getElementById('view-mode-toggle-btn');
+      const label = document.getElementById('view-mode-label');
+
+      if (isExpandedView) {
+        frame.classList.add('fullscreen-mode');
+        btn.textContent = 'Phone Size';
+        label.textContent = 'Expanded Responsive Mode';
+      } else {
+        frame.classList.remove('fullscreen-mode');
+        btn.textContent = 'Expand View';
+        label.textContent = 'Phone Preview (390 × 844)';
+      }
+      lucide.createIcons();
+    }
+
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      const icon = document.getElementById('theme-icon');
+      if (html.classList.contains('dark')) {
+        icon.setAttribute('data-lucide', 'sun');
+      } else {
+        icon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
+    }
+
+    function updateClock() {
+      const clock = document.getElementById('status-bar-clock');
+      if (!clock) return;
+      const now = new Date();
+      const hrs = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      clock.textContent = `${hrs}:${mins}`;
+    }
+
+    Object.assign(window, {
+      togglePhoneMode,
+      toggleDarkMode,
+      openAuthModal,
+      closeAuthModal,
+      setAuthTab,
+      handleAuthAvatarPicked,
+      handleSignUpSubmit,
+      handleSignInSubmit,
+      quickSelectStudent,
+      handleHeaderAvatarClick,
+      openProfileModal,
+      closeProfileModal,
+      handleProfileAvatarPicked,
+      saveProfileChanges,
+      promptDeleteAccount,
+      closeDeleteConfirmModal,
+      executeDeleteAccount,
+      signOutUser,
+      handleDeviceFilePicked,
+      clearComposerAttachment,
+      toggleComposerVoiceRecording,
+      saveComposerVoiceNote,
+      cancelComposerVoiceNote,
+      toggleComposerPoll,
+      insertQuickTag,
+      focusComposer,
+      publishPost,
+      toggleLike,
+      toggleBookmark,
+      deletePost,
+      votePoll,
+      submitComment,
+      toggleComments,
+      setFeedTab,
+      handleSearch,
+      refreshFeed,
+      handleDeviceStoryPicked,
+      openStoryViewer,
+      advanceStory,
+      reactToStory,
+      closeStoryViewer,
+      toggleMessagesDrawer,
+      selectChatFriend,
+      handleChatFilePicked,
+      clearChatAttachment,
+      toggleChatVoiceRecorder,
+      sendChatVoiceRecording,
+      cancelChatVoiceRecording,
+      sendChatMessage,
+      toggleNotificationsDrawer,
+      clearAllNotifications,
+      setActiveNav
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initDatabase();
+      updateClock();
+      setInterval(updateClock, 10000);
+
+      // On startup, show the Auth Gateway if no user account exists yet
+      setTimeout(() => {
+        if (!currentUser && registeredUsers.length === 0) {
+          openAuthModal();
+        }
+      }, 300);
+    });
+  </script>
+</body>
+</html>

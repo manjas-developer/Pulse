@@ -1,1 +1,39 @@
-
+name: Deploy Pulse to GitHub Pages
+Trigger deployment on every push to main/master or on manual dispatch
+on:
+push:
+branches:
+- main
+- master
+workflow_dispatch:
+Grant GITHUB_TOKEN the necessary permissions to publish to GitHub Pages
+permissions:
+contents: read
+pages: write
+id-token: write
+Allow only one concurrent deployment, skipping any queued runs
+concurrency:
+group: "pages"
+cancel-in-progress: true
+jobs:
+deploy:
+environment:
+name: github-pages
+url: ${{ steps.deployment.outputs.page_url }}
+runs-on: ubuntu-latest
+steps:
+# Step 1: Checkout repository source files
+- name: Checkout Source Code
+uses: actions/checkout@v4
+# Step 2: Configure GitHub Pages routing metadata
+- name: Setup GitHub Pages Engine
+uses: actions/configure-pages@v5
+# Step 3: Package all static files from repository root
+- name: Upload Static Web Artifacts
+uses: actions/upload-pages-artifact@v3
+with:
+path: '.'
+# Step 4: Publish to GitHub Pages live CDN
+- name: Deploy to GitHub Pages Live CDN
+id: deployment
+uses: actions/deploy-pages@v4
